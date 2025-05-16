@@ -26,7 +26,6 @@ public class User {
     private String email;
     @Column(name="password_hash")
     private String password_hash;
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String bio;
     private String image;
@@ -35,8 +34,8 @@ public class User {
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "author")
-    private Set<Article> articles;
+//    @OneToMany(mappedBy = "author")
+//    private Set<Article> articles;
 
     //getters and setters...
 
@@ -104,11 +103,11 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public Set<Article> getArticles() {
-        return articles;
-    }
-
-    public void setArticles(Set<Article> articles) {
-        this.articles = articles;
-    }
+//    public Set<Article> getArticles() {
+//        return articles;
+//    }
+//
+//    public void setArticles(Set<Article> articles) {
+//        this.articles = articles;
+//    }
 }

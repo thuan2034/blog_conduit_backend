@@ -1,45 +1,36 @@
-package com.blog.conduit.models;
-
-import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+package com.blog.conduit.dtos;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "article")
-public class Article {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ArticleResponseDto {
     private Integer id;
-
     private String slug;
     private String title;
     private String description;
     private String body;
-
-    @Column(name = "favorites_count",
-            insertable = false,
-            updatable = false)
     private Integer favoritesCount;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
-
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private AuthorDto author;
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime updatedAt;
 
-    // getters + setters…
+    //constructors...
+    public ArticleResponseDto() {
+    }
 
+    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, AuthorDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
+        this.id = id;
+        this.slug = slug;
+        this.title = title;
+        this.body = body;
+        this.description = description;
+        this.favoritesCount = favoritesCount;
+        this.author = author;
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
+    }
+
+    //getters and setters
     public Integer getId() {
         return id;
     }
@@ -88,11 +79,11 @@ public class Article {
         this.favoritesCount = favoritesCount;
     }
 
-    public User getAuthor() {
+    public AuthorDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(AuthorDto author) {
         this.author = author;
     }
 
