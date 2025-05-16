@@ -2,6 +2,7 @@ package com.blog.conduit.dtos;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public class ArticleResponseDto {
     private Integer id;
@@ -13,6 +14,7 @@ public class ArticleResponseDto {
     private AuthorDto author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> tagList;
 
     //constructors...
     public ArticleResponseDto() {
@@ -28,6 +30,14 @@ public class ArticleResponseDto {
         this.author = author;
         this.updatedAt = updatedAt;
         this.createdAt = createdAt;
+    }
+
+    public List<String> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<String> tagList) {
+        this.tagList = tagList;
     }
 
     //getters and setters

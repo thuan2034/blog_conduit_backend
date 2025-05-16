@@ -3,14 +3,23 @@ package com.blog.conduit.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="Tag")
+@Table(name = "Tag")
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name="tag_name", columnDefinition = "character varying(255)")
+    @Column(name = "tag_name", columnDefinition = "character varying(255)")
     private String tagName;
+
+    //constructors...
+    public Tag() {
+    }
+
+    public Tag(String tagName) {
+        this.tagName = tagName;
+    }
+
 
     //getter and setter...
 
