@@ -40,35 +40,6 @@ public class ArticleService {
                 .toList();
     }
 
-    private ArticleResponseDto mapToDto(Article article) {
-        User author = article.getAuthor(); // Hibernate load trong cùng transaction
-        // Build AuthorDto
-        AuthorDto authorDto = new AuthorDto(
-                author.getUserName(),
-                author.getBio(),
-                author.getImage()
-        );
-        // Build ArticleResponseDto
-        ArticleResponseDto articleResponseDto = new ArticleResponseDto(
-                article.getId(),
-                article.getSlug(),
-                article.getTitle(),
-                article.getDescription(),
-                article.getBody(),
-                article.getFavoritesCount(),
-                authorDto,
-                article.getCreatedAt(),
-                article.getUpdatedAt()
-        );
-        List<ArticleTag> articleTagList = articleTagRepository.findByArticle(article);
-
-        List<String> tagName = articleTagList.stream()
-                .map(articleTag -> articleTag.getTag().getTagName())
-                .collect(Collectors.toList()); // Sửa lỗi ở đây
-
-        articleResponseDto.setTagList(tagName);
-        return articleResponseDto;
-    }
 
     @Transactional
     public Optional<ArticleResponseDto> findById(Integer id) {
@@ -98,5 +69,35 @@ public class ArticleService {
         newArticle.setDescription(articleCreateRequestDto.getDescription());
         newArticle.setAuthor(author);
         return articleRepo.save(newArticle);
+    }
+
+    private ArticleResponseDto mapToDto(Article article) {
+        User author = article.getAuthor(); // Hibernate load trong cùng transaction
+        // Build AuthorDto
+        AuthorDto authorDto = new AuthorDto(
+                author.getUserName(),
+                author.getBio(),
+                author.getImage()
+        );
+        // Build ArticleResponseDto
+        ArticleResponseDto articleResponseDto = new ArticleResponseDto(
+                article.getId(),
+                article.getSlug(),
+                article.getTitle(),
+                article.getDescription(),
+                article.getBody(),
+                article.getFavoritesCount(),
+                authorDto,
+                article.getCreatedAt(),
+                article.getUpdatedAt()
+        );
+        List<ArticleTag> articleTagList = articleTagRepository.findByArticle(article);
+
+        List<String> tagName = articleTagList.stream()
+                .map(articleTag -> articleTag.getTag().getTagName())
+                .collect(Collectors.toList()); // Sửa lỗi ở đây
+
+        articleResponseDto.setTagList(tagName);
+        return articleResponseDto;
     }
 }
