@@ -1,7 +1,5 @@
 package com.blog.conduit.dtos;
 
-import com.blog.conduit.models.User;
-
 import java.time.LocalDateTime;
 
 public class CommentResponseDto {
@@ -9,13 +7,13 @@ public class CommentResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String body;
-    private AuthorDto author;
+    private UserResponseDto author;
 
     //constructors...
     public CommentResponseDto() {
     }
 
-    public CommentResponseDto(Integer id, AuthorDto author, String body, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    public CommentResponseDto(Integer id, UserResponseDto author, String body, LocalDateTime updatedAt, LocalDateTime createdAt) {
         this.id = id;
         this.author = author;
         this.body = body;
@@ -40,11 +38,11 @@ public class CommentResponseDto {
         this.id = id;
     }
 
-    public AuthorDto getAuthor() {
+    public UserResponseDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(AuthorDto author) {
+    public void setAuthor(UserResponseDto author) {
         this.author = author;
     }
 

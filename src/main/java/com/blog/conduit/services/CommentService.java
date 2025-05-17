@@ -1,6 +1,6 @@
 package com.blog.conduit.services;
 
-import com.blog.conduit.dtos.AuthorDto;
+import com.blog.conduit.dtos.UserResponseDto;
 import com.blog.conduit.dtos.CommentCreateRequestDto;
 import com.blog.conduit.dtos.CommentResponseDto;
 import com.blog.conduit.models.Article;
@@ -12,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.PrivateKey;
 import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class CommentService {
@@ -40,15 +36,15 @@ public class CommentService {
 
     private CommentResponseDto mapToDto(Comment comment){
         User author=comment.getAuthor();
-        AuthorDto authorDto = new AuthorDto(author.getUserName(), author.getBio(), author.getImage());
-        return new CommentResponseDto(comment.getId(), authorDto, comment.getBody(), comment.getUpdatedAt(), comment.getCreatedAt());
+        UserResponseDto userResponseDto = new UserResponseDto(author.getUserName(), author.getBio(), author.getImage());
+        return new CommentResponseDto(comment.getId(), userResponseDto, comment.getBody(), comment.getUpdatedAt(), comment.getCreatedAt());
     }
 
     @Transactional
     public CommentResponseDto create(CommentCreateRequestDto commentCreateRequestDto){
         Article foundArticle = articleService.findBySlug(commentCreateRequestDto.getSlug()).orElseThrow(() -> new EntityNotFoundException(
                 "Article slug=" + commentCreateRequestDto.getSlug() + " không tồn tại"));
-        User foundAuthor = userService.findById(commentCreateRequestDto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException(
+        User foundAuthor = userService.findByIdEntity(commentCreateRequestDto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException(
                 "User ID = " + commentCreateRequestDto.getAuthorId() + " không tồn tại"));
         Comment newComment = commentRepo.save(new Comment(foundAuthor,foundArticle,commentCreateRequestDto.getBody()));
         return new CommentResponseDto(newComment.getId(),newComment.getBody(),newComment.getUpdatedAt(),newComment.getCreatedAt());

@@ -1,7 +1,6 @@
 package com.blog.conduit.dtos;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 public class ArticleResponseDto {
@@ -11,7 +10,7 @@ public class ArticleResponseDto {
     private String description;
     private String body;
     private Integer favoritesCount;
-    private AuthorDto author;
+    private UserResponseDto author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> tagList;
@@ -20,7 +19,7 @@ public class ArticleResponseDto {
     public ArticleResponseDto() {
     }
 
-    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, AuthorDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, UserResponseDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
         this.id = id;
         this.slug = slug;
         this.title = title;
@@ -89,11 +88,11 @@ public class ArticleResponseDto {
         this.favoritesCount = favoritesCount;
     }
 
-    public AuthorDto getAuthor() {
+    public UserResponseDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(AuthorDto author) {
+    public void setAuthor(UserResponseDto author) {
         this.author = author;
     }
 

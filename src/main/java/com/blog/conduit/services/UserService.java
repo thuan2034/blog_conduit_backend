@@ -1,6 +1,7 @@
 package com.blog.conduit.services;
 
 import com.blog.conduit.dtos.UserCreateRequestDto;
+import com.blog.conduit.dtos.UserResponseDto;
 import com.blog.conduit.enums.UserRole;
 import com.blog.conduit.models.User;
 import com.blog.conduit.repositories.TagRepository;
@@ -22,27 +23,33 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return userRepo.findAll();
+    public List<UserResponseDto> findAll() {
+        return userRepo.findAll().stream().map(this::mapToDto).toList();
     }
 
-    @Transactional(readOnly = true)
-    public Optional<User> findById(Integer id) {
+    @Transactional
+    public Optional<User> findByIdEntity(Integer id) {
+        // Logic tìm User entity trong repository
         return userRepo.findById(id);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findByUserName(String userName) {
-        return userRepo.findByUserName(userName);
+    public Optional<UserResponseDto> findById(Integer id) {
+        return userRepo.findById(id).map(this::mapToDto);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findByEmail(String email) {
-        return userRepo.findByEmail(email);
+    public Optional<UserResponseDto> findByUserName(String userName) {
+        return userRepo.findByUserName(userName).map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserResponseDto> findByEmail(String email) {
+        return userRepo.findByEmail(email).map(this::mapToDto);
     }
 
     @Transactional
-    public User create(UserCreateRequestDto userDto){
+    public UserResponseDto create(UserCreateRequestDto userDto) {
         User newUser = new User();
         // Ánh xạ dữ liệu từ DTO sang Entity
         newUser.setUserName(userDto.getUserName());
@@ -51,8 +58,11 @@ public class UserService {
         newUser.setBio(userDto.getBio());
         newUser.setImage(userDto.getImage());
         newUser.setRole(userDto.getRole() != null ? userDto.getRole() : UserRole.USER);
-        return userRepo.save(newUser);
+        userRepo.save(newUser);
+        return new UserResponseDto(newUser.getUserName(), newUser.getBio(), newUser.getImage());
     }
 
-
+    private UserResponseDto mapToDto(User user) {
+        return new UserResponseDto(user.getUserName(), user.getBio(), user.getImage());
+    }
 }

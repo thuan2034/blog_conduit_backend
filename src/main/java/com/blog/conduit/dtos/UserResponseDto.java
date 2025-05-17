@@ -1,14 +1,14 @@
 package com.blog.conduit.dtos;
 
-public class AuthorDto {
+public class UserResponseDto {
     private String userName;
     private String bio;
     private String image;
 
-    public AuthorDto() {
+    public UserResponseDto() {
     }
 
-    public AuthorDto(String userName, String bio, String image) {
+    public UserResponseDto(String userName, String bio, String image) {
         this.userName = userName;
         this.bio = bio;
         this.image = image;

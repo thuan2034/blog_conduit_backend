@@ -2,7 +2,7 @@ package com.blog.conduit.services;
 
 import com.blog.conduit.dtos.ArticleCreateRequestDto;
 import com.blog.conduit.dtos.ArticleResponseDto;
-import com.blog.conduit.dtos.AuthorDto;
+import com.blog.conduit.dtos.UserResponseDto;
 import com.blog.conduit.models.Article;
 import com.blog.conduit.models.ArticleTag;
 import com.blog.conduit.models.User;
@@ -73,8 +73,8 @@ public class ArticleService {
 
     private ArticleResponseDto mapToDto(Article article) {
         User author = article.getAuthor(); // Hibernate load trong cùng transaction
-        // Build AuthorDto
-        AuthorDto authorDto = new AuthorDto(
+        // Build UserResponseDto
+        UserResponseDto userResponseDto = new UserResponseDto(
                 author.getUserName(),
                 author.getBio(),
                 author.getImage()
@@ -87,7 +87,7 @@ public class ArticleService {
                 article.getDescription(),
                 article.getBody(),
                 article.getFavoritesCount(),
-                authorDto,
+                userResponseDto,
                 article.getCreatedAt(),
                 article.getUpdatedAt()
         );
