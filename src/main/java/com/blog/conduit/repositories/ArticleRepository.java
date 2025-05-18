@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
     Optional<Article> findBySlug(String slug);
-    List<Article> findByTitle(String title);
+    Optional<Article> findByTitle(String title);
 }

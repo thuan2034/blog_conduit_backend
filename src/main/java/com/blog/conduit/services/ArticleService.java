@@ -48,13 +48,17 @@ public class ArticleService {
     }
 
     @Transactional
-    public Optional<Article> findBySlug(String slug) {
+    public Optional<Article> findEntityBySlug(String slug) {
         return articleRepo.findBySlug(slug);
+    }
+    @Transactional
+    public Optional<ArticleResponseDto> findBySlug(String slug) {
+        return articleRepo.findBySlug(slug).map(this::mapToDto);
     }
 
     @Transactional
-    public List<Article> findByTitle(String title) {
-        return articleRepo.findByTitle(title);
+    public Optional<ArticleResponseDto> findByTitle(String title) {
+        return articleRepo.findByTitle(title).map(this::mapToDto);
     }
 
     @Transactional

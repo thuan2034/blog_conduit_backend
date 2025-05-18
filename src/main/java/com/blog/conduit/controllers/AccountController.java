@@ -1,39 +1,30 @@
 package com.blog.conduit.controllers;
 
+import com.blog.conduit.dtos.LoginRequestDto;
+import com.blog.conduit.dtos.LoginResponseDto;
 import com.blog.conduit.dtos.UserCreateRequestDto;
 import com.blog.conduit.dtos.UserResponseDto;
 import com.blog.conduit.models.ResponseObject;
-import com.blog.conduit.models.User;
-import com.blog.conduit.repositories.UserRepository;
+import com.blog.conduit.services.AuthenticationService;
 import com.blog.conduit.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("api/users")
-public class UserController {
-    @Autowired
+public class AccountController {
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
-    public UserController(UserService userService) {
+    public AccountController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
-    }
-
-    @GetMapping
-    public List<UserResponseDto> getAll() {
-        return userService.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseObject> findById(@PathVariable Integer id) {
-        Optional<UserResponseDto> foundUser = userService.findById(id);
-        return foundUser.isPresent() ? ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found user", foundUser)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false", "cannot find user with id" + id, ""));
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping
@@ -46,5 +37,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("false", "email: " + userDto.getEmail() + " already exist", ""));
         UserResponseDto createdUser = userService.create(userDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "created user", createdUser));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ResponseObject> login(@RequestBody LoginRequestDto loginRequestDto) {
+        try {
+            LoginResponseDto responseDto = authenticationService.login(loginRequestDto);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("OK", "Login successful", responseDto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ResponseObject("false", e.getMessage(), ""));
+        }
     }
 }

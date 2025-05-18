@@ -28,7 +28,7 @@ public class CommentService {
 
     @Transactional
     public List<CommentResponseDto> findByArticleSlug(String slug){
-        Article foundArticle = articleService.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException(
+        Article foundArticle = articleService.findEntityBySlug(slug).orElseThrow(() -> new EntityNotFoundException(
                 "Article slug=" + slug + " không tồn tại"));
         List<Comment> commentList = commentRepo.findByArticle(foundArticle);
         return commentList.stream().map(this::mapToDto).toList();
@@ -42,7 +42,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponseDto create(CommentCreateRequestDto commentCreateRequestDto){
-        Article foundArticle = articleService.findBySlug(commentCreateRequestDto.getSlug()).orElseThrow(() -> new EntityNotFoundException(
+        Article foundArticle = articleService.findEntityBySlug(commentCreateRequestDto.getSlug()).orElseThrow(() -> new EntityNotFoundException(
                 "Article slug=" + commentCreateRequestDto.getSlug() + " không tồn tại"));
         User foundAuthor = userService.findByIdEntity(commentCreateRequestDto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException(
                 "User ID = " + commentCreateRequestDto.getAuthorId() + " không tồn tại"));

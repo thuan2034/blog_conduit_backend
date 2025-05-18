@@ -41,9 +41,17 @@ public class ArticleController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with id=" + id, ""));
     }
 
+    @GetMapping("/{slug}")
+    public ResponseEntity<ResponseObject> getBySlug(@PathVariable String slug){
+      Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
+      return foundArticle.isPresent()?
+              ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
+              ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
+    }
+
     @PostMapping
     public ResponseEntity<ResponseObject> create(@RequestBody ArticleCreateRequestDto articleCreateRequestDto) {
-        Optional<Article> foundArticle = articleService.findBySlug(articleCreateRequestDto.getSlug());
+        Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(articleCreateRequestDto.getSlug());
         if (foundArticle.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FAILED", "slug name existed", ""));
         Article newArticle = articleService.create(articleCreateRequestDto);

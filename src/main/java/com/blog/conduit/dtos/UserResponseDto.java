@@ -4,6 +4,7 @@ public class UserResponseDto {
     private String userName;
     private String bio;
     private String image;
+    private Boolean following;
 
     public UserResponseDto() {
     }
@@ -12,6 +13,7 @@ public class UserResponseDto {
         this.userName = userName;
         this.bio = bio;
         this.image = image;
+        this.following = false;
     }
 
     //getters and setters...
