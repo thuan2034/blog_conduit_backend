@@ -3,27 +3,19 @@ package com.blog.conduit.dtos;
 public class CommentCreateRequestDto {
     private String slug;
     private String body;
-    private Integer authorId;
+
 
     //constructors...
     public CommentCreateRequestDto() {
     }
 
-    public CommentCreateRequestDto(String slug, String body, Integer authorId) {
+    public CommentCreateRequestDto(String slug, String body) {
         this.slug = slug;
         this.body = body;
-        this.authorId = authorId;
     }
 
     //getters and setters...
 
-    public Integer getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(Integer authorId) {
-        this.authorId = authorId;
-    }
 
     public String getSlug() {
         return slug;

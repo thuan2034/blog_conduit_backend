@@ -29,20 +29,23 @@ public class ArticleController {
     }
 
     @GetMapping
-    public List<ArticleResponseDto> getAll() {
-        return articleService.findAll();
+    public List<ArticleResponseDto> getAll(
+            @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
+            @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
+    ) {
+        return articleService.findAll(limit,offset);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseObject> getById(@PathVariable Integer id) {
-        Optional<ArticleResponseDto> foundArticle = articleService.findById(id);
-        return foundArticle.isPresent() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with id=" + id, ""));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ResponseObject> getById(@PathVariable Integer id) {
+//        Optional<ArticleResponseDto> foundArticle = articleService.findById(id);
+//        return foundArticle.isPresent() ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
+//                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with id=" + id, ""));
+//    }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<ResponseObject> getBySlug(@PathVariable String slug){
+    public ResponseEntity<ResponseObject> getBySlug(@PathVariable("slug") String slug){
       Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
       return foundArticle.isPresent()?
               ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
@@ -62,5 +65,15 @@ public class ArticleController {
             }
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseObject("OK", "created new article", newArticle));
+    }
+
+    @PostMapping("/{slug}/favorite")
+    public ResponseEntity<?> favoriteArticle(@PathVariable("slug") String slug){
+        return null;
+    }
+
+    @DeleteMapping("/{slug}/favorite")
+    public  ResponseEntity<?> unFavoriteArticle(@PathVariable("slug") String slug){
+        return null;
     }
 }

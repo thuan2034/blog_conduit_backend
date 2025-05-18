@@ -7,13 +7,13 @@ public class CommentResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String body;
-    private UserResponseDto author;
+    private ProfileResponseDto author;
 
     //constructors...
     public CommentResponseDto() {
     }
 
-    public CommentResponseDto(Integer id, UserResponseDto author, String body, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    public CommentResponseDto(Integer id, ProfileResponseDto author, String body, LocalDateTime updatedAt, LocalDateTime createdAt) {
         this.id = id;
         this.author = author;
         this.body = body;
@@ -38,11 +38,11 @@ public class CommentResponseDto {
         this.id = id;
     }
 
-    public UserResponseDto getAuthor() {
+    public ProfileResponseDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(UserResponseDto author) {
+    public void setAuthor(ProfileResponseDto author) {
         this.author = author;
     }
 

@@ -10,7 +10,7 @@ public class ArticleResponseDto {
     private String description;
     private String body;
     private Integer favoritesCount;
-    private UserResponseDto author;
+    private ProfileResponseDto author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> tagList;
@@ -19,7 +19,7 @@ public class ArticleResponseDto {
     public ArticleResponseDto() {
     }
 
-    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, UserResponseDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, ProfileResponseDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
         this.id = id;
         this.slug = slug;
         this.title = title;
@@ -88,11 +88,11 @@ public class ArticleResponseDto {
         this.favoritesCount = favoritesCount;
     }
 
-    public UserResponseDto getAuthor() {
+    public ProfileResponseDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(UserResponseDto author) {
+    public void setAuthor(ProfileResponseDto author) {
         this.author = author;
     }
 

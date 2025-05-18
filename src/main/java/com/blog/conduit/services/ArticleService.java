@@ -2,15 +2,22 @@ package com.blog.conduit.services;
 
 import com.blog.conduit.dtos.ArticleCreateRequestDto;
 import com.blog.conduit.dtos.ArticleResponseDto;
-import com.blog.conduit.dtos.UserResponseDto;
+import com.blog.conduit.dtos.ProfileResponseDto;
 import com.blog.conduit.models.Article;
 import com.blog.conduit.models.ArticleTag;
+import com.blog.conduit.models.Follow;
 import com.blog.conduit.models.User;
 import com.blog.conduit.repositories.ArticleRepository;
 import com.blog.conduit.repositories.ArticleTagRepository;
+import com.blog.conduit.repositories.FollowRepository;
 import com.blog.conduit.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,16 +33,23 @@ public class ArticleService {
     private final UserRepository userRepo;
     @Autowired
     private final ArticleTagRepository articleTagRepository;
+    private final FollowRepository followRepo;
 
-    public ArticleService(ArticleRepository articleRepo, UserRepository userRepo, ArticleTagRepository articleTagRepository) {
+    public ArticleService(ArticleRepository articleRepo, UserRepository userRepo, ArticleTagRepository articleTagRepository, FollowRepository followRepo) {
         this.articleRepo = articleRepo;
         this.userRepo = userRepo;
         this.articleTagRepository = articleTagRepository;
+        this.followRepo = followRepo;
     }
 
     @Transactional
-    public List<ArticleResponseDto> findAll() {
-        return articleRepo.findAll().stream()
+    public List<ArticleResponseDto> findAll(int limit,int offset) {
+        if (limit < 0) limit = 20; // Default limit
+        if (offset < 0) offset = 0; // Default offset
+        Sort sort = Sort.by("createdAt").descending();
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        return articleRepo.findAll(pageable).stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -51,9 +65,26 @@ public class ArticleService {
     public Optional<Article> findEntityBySlug(String slug) {
         return articleRepo.findBySlug(slug);
     }
+
     @Transactional
     public Optional<ArticleResponseDto> findBySlug(String slug) {
-        return articleRepo.findBySlug(slug).map(this::mapToDto);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // Lấy email từ JWT subject
+        if (email == null || email.equals("anonymousUser")) {
+            return articleRepo.findBySlug(slug).map(this::mapToDto);
+        } else {
+            Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài viết"));
+            User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                    "User email = " + email + " không tồn tại"));
+            Optional<Follow> isFollow = followRepo.findByFollowingUserAndFollowedUser(currentUser, foundArticle.getAuthor());
+            ArticleResponseDto articleResponseDto = mapToDto(foundArticle);
+            if (isFollow.isPresent()) {
+                articleResponseDto.getAuthor().setFollowing(true);
+                return Optional.of(articleResponseDto);
+            }
+            else
+                return Optional.of(articleResponseDto);
+        }
     }
 
     @Transactional
@@ -77,8 +108,8 @@ public class ArticleService {
 
     private ArticleResponseDto mapToDto(Article article) {
         User author = article.getAuthor(); // Hibernate load trong cùng transaction
-        // Build UserResponseDto
-        UserResponseDto userResponseDto = new UserResponseDto(
+        // Build ProfileResponseDto
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto(
                 author.getUserName(),
                 author.getBio(),
                 author.getImage()
@@ -91,7 +122,7 @@ public class ArticleService {
                 article.getDescription(),
                 article.getBody(),
                 article.getFavoritesCount(),
-                userResponseDto,
+                profileResponseDto,
                 article.getCreatedAt(),
                 article.getUpdatedAt()
         );

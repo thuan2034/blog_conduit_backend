@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfiguration {
-    
+
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     public SecurityConfiguration(JwtAuthenticationFilter jwtAuthFilter) {
@@ -36,9 +36,7 @@ public class SecurityConfiguration {
                 // Disable CSRF as we're using stateless JWT authentication
                 .csrf(csrf -> csrf.disable())
                 // Configure request authorization
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users", "/api/users/login", "/api/profiles", "/api/profiles/*", "/api/tags", "/api/tags/*").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/users", "/api/users/login", "/api/profiles", "/api/profiles/*", "/api/tags", "/api/tags/*", "/api/articles", "/api/articles/**").permitAll().anyRequest().authenticated())
                 // Use stateless session management
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Add JWT filter before UsernamePasswordAuthenticationFilter

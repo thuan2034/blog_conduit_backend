@@ -4,36 +4,37 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name="follow")
+@Table(name = "follow")
 public class Follow {
     @EmbeddedId
     private FollowId id;
 
     @ManyToOne
     @MapsId("followingId")
-    @JoinColumn(name="following_user_id")
+    @JoinColumn(name = "following_user_id")
     private User followingUser;
 
     @ManyToOne
     @MapsId("followedId")
     @JoinColumn(name = "followed_user_id")
-    private  User followedUser;
+    private User followedUser;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
 
     //constructors
-    public Follow(){}
-    public Follow(User followedUser,User followingUser, OffsetDateTime createdAt){
-        this.followedUser=followedUser;
-        this.followingUser=followingUser;
-        this.createdAt=createdAt;
-        this.id=new FollowId(followedUser.getId(),followingUser.getId());
+    public Follow() {
+    }
+
+    public Follow(User followedUser, User followingUser) {
+        this.followedUser = followedUser;
+        this.followingUser = followingUser;
+        this.id = new FollowId(followedUser.getId(), followingUser.getId());
     }
 
     //setters and getters...
@@ -41,6 +42,7 @@ public class Follow {
     public FollowId getId() {
         return id;
     }
+
 
     public void setId(FollowId id) {
         this.id = id;
@@ -62,7 +64,11 @@ public class Follow {
         this.followedUser = followedUser;
     }
 
-    public OffsetDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

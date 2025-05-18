@@ -39,7 +39,7 @@ public class AuthenticationService {
             
             // If authentication is successful, find the user
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-            if (!userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
                 throw new UsernameNotFoundException("User not found with email: " + loginRequest.getEmail());
             }
             

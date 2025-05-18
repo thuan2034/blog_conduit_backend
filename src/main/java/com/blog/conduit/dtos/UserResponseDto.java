@@ -1,28 +1,29 @@
 package com.blog.conduit.dtos;
 
 public class UserResponseDto {
+    private String email;
     private String userName;
     private String bio;
     private String image;
-    private Boolean following;
 
+    //constructors...
     public UserResponseDto() {
     }
 
-    public UserResponseDto(String userName, String bio, String image) {
-        this.userName = userName;
-        this.bio = bio;
+    public UserResponseDto(String email, String image, String bio, String userName) {
+        this.email = email;
         this.image = image;
-        this.following = false;
+        this.bio = bio;
+        this.userName = userName;
     }
 
     //getters and setters...
-    public String getUserName() {
-        return userName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getImage() {
@@ -39,5 +40,13 @@ public class UserResponseDto {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

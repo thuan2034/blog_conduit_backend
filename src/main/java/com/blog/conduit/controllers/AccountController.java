@@ -2,8 +2,8 @@ package com.blog.conduit.controllers;
 
 import com.blog.conduit.dtos.LoginRequestDto;
 import com.blog.conduit.dtos.LoginResponseDto;
+import com.blog.conduit.dtos.ProfileResponseDto;
 import com.blog.conduit.dtos.UserCreateRequestDto;
-import com.blog.conduit.dtos.UserResponseDto;
 import com.blog.conduit.models.ResponseObject;
 import com.blog.conduit.services.AuthenticationService;
 import com.blog.conduit.services.UserService;
@@ -29,13 +29,13 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<ResponseObject> createUser(@RequestBody UserCreateRequestDto userDto) {
-        Optional<UserResponseDto> foundUsername = userService.findByUserName(userDto.getUserName());
-        Optional<UserResponseDto> foundEmail = userService.findByEmail(userDto.getEmail());
+        Optional<ProfileResponseDto> foundUsername = Optional.ofNullable(userService.findByUserName(userDto.getUserName()));
+        Optional<ProfileResponseDto> foundEmail = userService.findByEmail(userDto.getEmail());
         if (foundUsername.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("false", "username: " + userDto.getUserName() + " already taken", ""));
         if (foundEmail.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("false", "email: " + userDto.getEmail() + " already exist", ""));
-        UserResponseDto createdUser = userService.create(userDto);
+        ProfileResponseDto createdUser = userService.create(userDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "created user", createdUser));
     }
 
