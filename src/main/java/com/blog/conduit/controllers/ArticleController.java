@@ -5,7 +5,6 @@ import com.blog.conduit.dtos.ArticlePageResponseDto;
 import com.blog.conduit.dtos.ArticleResponseDto;
 import com.blog.conduit.models.Article;
 import com.blog.conduit.models.ResponseObject;
-import com.blog.conduit.models.Tag;
 import com.blog.conduit.services.ArticleService;
 import com.blog.conduit.services.ArticleTagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +31,21 @@ public class ArticleController {
     @GetMapping
     public ArticlePageResponseDto getArticlePage(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
-            @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
+            @RequestParam(value = "offset", defaultValue = "0") int offset, // Default 0
+            @RequestParam(value="tag") String tag,
+            @RequestParam(value="author") String author,
+            @RequestParam(value="favorited") String favorited
     ) {
-        return articleService.findAll(limit,offset);
+        return articleService.findAll(limit,offset,tag,author,favorited);
+    }
+
+    @GetMapping("/feed")
+    public ArticlePageResponseDto getFeedArticles(
+            @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
+            @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
+    )
+    {
+        return articleService.findFeedArticles(limit, offset);
     }
 
 //    @GetMapping("/{id}")

@@ -45,7 +45,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticlePageResponseDto findAll(int limit, int offset) {
+    public ArticlePageResponseDto findAll(int limit, int offset, String tag, String author, String favorited) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName(); // Lấy email từ JWT subject
         if (limit < 0) limit = 20; // Default limit
@@ -59,16 +59,16 @@ public class ArticleService {
         int totalPages = articlePage.getTotalPages();       // Lấy TỔNG số trang
         int currentPage = articlePage.getNumber();          // Số của trang hiện tại (bắt đầu từ 0)
         int pageSize = articlePage.getSize();               // Kích thước trang (chính là limit)
-            List<ArticleResponseDto> articleResponseDtoList = articleList.stream().map(this::mapToDto).toList();
+        List<ArticleResponseDto> articleResponseDtoList = articleList.stream().map(this::mapToDto).toList();
         if (email == null || email.equals("anonymousUser")) {//nếu chưa đăng nhập, không cần kiểm tra trạng thái follow
             return new ArticlePageResponseDto(articleResponseDtoList, pageSize, currentPage, totalPages, totalArticles);
         } else {
             User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
             articleResponseDtoList.forEach(dto -> {
-                User author = userRepo.findByUserName(dto.getAuthor().getUserName())
+                User foundAuthor = userRepo.findByUserName(dto.getAuthor().getUserName())
                         .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy user"));
                 boolean isFollowing = followRepo
-                        .findByFollowingUserAndFollowedUser(currentUser, author)
+                        .findByFollowingUserAndFollowedUser(currentUser, foundAuthor)
                         .isPresent();
                 dto.getAuthor().setFollowing(isFollowing);
             });
@@ -76,6 +76,28 @@ public class ArticleService {
         }
     }
 
+    @Transactional
+    public ArticlePageResponseDto findFeedArticles(int limit, int offset) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // Lấy email từ JWT subject
+        User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
+        if (limit < 0) limit = 20; // Default limit
+        if (offset < 0) offset = 0; // Default offset
+        Sort sort = Sort.by("createdAt").descending();
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        Page<Article> articlePage = articleRepo.findFeedArticles(currentUser,pageable);
+        List<Article> articleList = articlePage.getContent();
+        long totalArticles = articlePage.getTotalElements(); // Lấy TỔNG số bản ghi trên tất cả các trang
+        int totalPages = articlePage.getTotalPages();       // Lấy TỔNG số trang
+        int currentPage = articlePage.getNumber();          // Số của trang hiện tại (bắt đầu từ 0)
+        int pageSize = articlePage.getSize();               // Kích thước trang (chính là limit)
+        List<ArticleResponseDto> articleResponseDtoList = articleList.stream().map(this::mapToDto).toList();
+        articleResponseDtoList.forEach(dto->{
+            dto.getAuthor().setFollowing(true);
+        });
+        return new ArticlePageResponseDto(articleResponseDtoList,pageSize,currentPage,totalPages,totalArticles);
+    }
 
     @Transactional
     public Optional<ArticleResponseDto> findById(Integer id) {
@@ -121,6 +143,7 @@ public class ArticleService {
         newArticle.setAuthor(author);
         return articleRepo.save(newArticle);
     }
+
 
     private ArticleResponseDto mapToDto(Article article) {
         User author = article.getAuthor(); // Hibernate load trong cùng transaction

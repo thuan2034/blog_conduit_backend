@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -20,9 +21,7 @@ public class Article {
     private String description;
     private String body;
 
-    @Column(name = "favorites_count",
-            insertable = false,
-            updatable = false)
+    @Column(name = "favorites_count", insertable = false, updatable = false)
     private Integer favoritesCount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,6 +36,9 @@ public class Article {
     @LastModifiedDate
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "article")
+    private Set<Tag> tags;
 
     // getters + setters…
 
@@ -110,5 +112,13 @@ public class Article {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 }
