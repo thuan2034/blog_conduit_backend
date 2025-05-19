@@ -1,6 +1,7 @@
 package com.blog.conduit.controllers;
 
 import com.blog.conduit.dtos.ArticleCreateRequestDto;
+import com.blog.conduit.dtos.ArticlePageResponseDto;
 import com.blog.conduit.dtos.ArticleResponseDto;
 import com.blog.conduit.models.Article;
 import com.blog.conduit.models.ResponseObject;
@@ -29,7 +30,7 @@ public class ArticleController {
     }
 
     @GetMapping
-    public List<ArticleResponseDto> getAll(
+    public ArticlePageResponseDto getArticlePage(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
     ) {

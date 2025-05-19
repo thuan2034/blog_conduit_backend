@@ -21,10 +21,10 @@ public class ProfileController {
         this.userService = userService;
     }
 
-    @GetMapping
-    public List<ProfileResponseDto> getAll() {
-        return userService.findAll();
-    }
+//    @GetMapping
+//    public List<ProfileResponseDto> getAll() {
+//        return userService.findAll();
+//    }
 
 //    @GetMapping("/{id}")
 //    public ResponseEntity<ResponseObject> findById(@PathVariable Integer id) {
