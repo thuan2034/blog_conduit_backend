@@ -1,5 +1,6 @@
 package com.blog.conduit.controllers;
 
+import com.blog.conduit.dtos.TagResponseDto;
 import com.blog.conduit.models.ResponseObject;
 import com.blog.conduit.models.Tag;
 import com.blog.conduit.services.TagService;
@@ -23,7 +24,7 @@ public class TagController {
 
     // 1. Lấy danh sách tất cả tag
     @GetMapping
-    public List<Tag> getAll() {
+    public List<TagResponseDto> getAll() {
         return tagService.findAll();
     }
 
@@ -36,14 +37,14 @@ public class TagController {
     }
 
     // 3. Tạo mới tag
-    @PostMapping
-    public ResponseEntity<ResponseObject> create(@RequestBody Tag tag) {
-        Optional<Tag> foundTag = tagService.findByTagName(tag.getTagName());
-        if (foundTag.isEmpty())
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "tag inserted", tagService.create(tag)));
-        else
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body((new ResponseObject("failed", "tag already existed", "")));
-    }
+//    @PostMapping
+//    public ResponseEntity<ResponseObject> create(@RequestBody Tag tag) {
+//        Optional<Tag> foundTag = tagService.findByName(tag.getTagName());
+//        if (foundTag.isEmpty())
+//            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "tag inserted", tagService.create(tag)));
+//        else
+//            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body((new ResponseObject("failed", "tag already existed", "")));
+//    }
 
     // 4. Cập nhật tag
 //    @PutMapping("/{id}")

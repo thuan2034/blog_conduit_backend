@@ -1,5 +1,6 @@
 package com.blog.conduit.services;
 
+import com.blog.conduit.dtos.TagResponseDto;
 import com.blog.conduit.models.Tag;
 import com.blog.conduit.repositories.TagRepository;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,8 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public List<Tag> findAll() {
-        return tagRepo.findAll();
+    public List<TagResponseDto> findAll() {
+        return tagRepo.findAll().stream().map(tag->new TagResponseDto(tag.getTagName())).toList();
     }
 
     @Transactional(readOnly = true)
@@ -27,12 +28,13 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Tag> findByTagName(String tagName){
+    public Optional<Tag> findByName(String tagName){
         return tagRepo.findByTagName(tagName);
     }
     @Transactional
-    public Tag create(Tag tag) {
-        return tagRepo.save(tag);
+    public Tag create(String tagName) {
+
+        return tagRepo.save(new Tag(tagName));
     }
 
     @Transactional

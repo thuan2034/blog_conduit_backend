@@ -8,12 +8,12 @@ public class ArticleTag {
     @EmbeddedId
     private ArticleTagId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("articleId")
     @JoinColumn(name = "article_id")
     private Article article;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("tagId")
     @JoinColumn(name = "tag_id")
     private Tag tag;

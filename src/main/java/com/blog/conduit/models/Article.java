@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -21,7 +22,9 @@ public class Article {
     private String description;
     private String body;
 
-    @Column(name = "favorites_count", insertable = false, updatable = false)
+    @Column(name = "favorites_count",
+            insertable = false,
+            updatable = false)
     private Integer favoritesCount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,10 +40,30 @@ public class Article {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "article")
-    private Set<Tag> tags;
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ArticleTag> tags = new HashSet<>();
+
+    // helper methods
+    public void addTag(Tag tag) {
+        ArticleTag at = new ArticleTag(this, tag);
+        tags.add(at);
+        tag.getArticles().add(at);
+    }
+
+    public void removeTag(Tag tag) {
+        tags.removeIf(at -> at.getTag().equals(tag));
+        tag.getArticles().removeIf(at -> at.getArticle().equals(this));
+    }
 
     // getters + setters…
+
+    public Set<ArticleTag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<ArticleTag> tags) {
+        this.tags = tags;
+    }
 
     public Integer getId() {
         return id;
@@ -112,13 +135,5 @@ public class Article {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
     }
 }

@@ -37,8 +37,8 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 // Configure request authorization
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/articles/feed","/api/articles/{slug}/favorite").authenticated()
                         .requestMatchers("/api/users", "/api/users/login", "/api/profiles", "/api/profiles/*", "/api/tags", "/api/tags/*", "/api/articles", "/api/articles/**").permitAll()
-                        .requestMatchers("/api/articles/feed").authenticated()
                         .anyRequest().authenticated())
                 // Use stateless session management
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

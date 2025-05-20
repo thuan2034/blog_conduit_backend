@@ -43,6 +43,12 @@ public class UserService {
         return userRepo.findById(id);
     }
 
+    @Transactional
+    public Optional<User> findByUserNameEntity(String userName) {
+        // Logic tìm User entity trong repository
+        return userRepo.findByUserName(userName);
+    }
+
     @Transactional(readOnly = true)
     public Optional<ProfileResponseDto> findById(Integer id) {
         return userRepo.findById(id).map(this::mapToDto);

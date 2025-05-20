@@ -37,11 +37,10 @@ public class ArticleTagService {
 
     @Transactional
     public ArticleTag create(Article article, String tagName) {
-        Optional<Tag> foundTag = tagService.findByTagName(tagName);
+        Optional<Tag> foundTag = tagService.findByName(tagName);
 
         Tag tag = foundTag.orElseGet(() -> {
-            Tag newTag = new Tag(tagName);
-            return tagService.create(newTag);
+            return tagService.create(tagName);
         });
 
         ArticleTag newArticleTag = new ArticleTag(article, tag);

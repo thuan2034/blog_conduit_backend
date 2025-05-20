@@ -9,6 +9,7 @@ public class ArticleResponseDto {
     private String title;
     private String description;
     private String body;
+    private boolean favorited;
     private Integer favoritesCount;
     private ProfileResponseDto author;
     private LocalDateTime createdAt;
@@ -19,7 +20,7 @@ public class ArticleResponseDto {
     public ArticleResponseDto() {
     }
 
-    public ArticleResponseDto(Integer id, String slug, String title, String body, String description, Integer favoritesCount, ProfileResponseDto author, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    public ArticleResponseDto(Integer id, String slug, String title, String body,boolean favorited, String description, Integer favoritesCount, ProfileResponseDto author, LocalDateTime updatedAt, LocalDateTime createdAt,List<String> tagList) {
         this.id = id;
         this.slug = slug;
         this.title = title;
@@ -29,6 +30,8 @@ public class ArticleResponseDto {
         this.author = author;
         this.updatedAt = updatedAt;
         this.createdAt = createdAt;
+        this.tagList = tagList;
+        this.favorited=favorited;
     }
 
     public List<String> getTagList() {
@@ -37,6 +40,14 @@ public class ArticleResponseDto {
 
     public void setTagList(List<String> tagList) {
         this.tagList = tagList;
+    }
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
     }
 
     //getters and setters

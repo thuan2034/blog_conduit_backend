@@ -7,7 +7,6 @@ public class ArticleCreateRequestDto {
     private String title;
     private String description;
     private String body;
-    private Integer authorId;
     private List<String> tagList;
 
     public List<String> getTagList() {
@@ -18,9 +17,6 @@ public class ArticleCreateRequestDto {
         this.tagList = tagList;
     }
 
-    public void setAuthorId(Integer authorId) {
-        this.authorId = authorId;
-    }
 
     public String getSlug() {
         return slug;
@@ -54,9 +50,6 @@ public class ArticleCreateRequestDto {
         this.body = body;
     }
 
-    public Integer getAuthorId() {
-        return authorId;
-    }
 
 
 }

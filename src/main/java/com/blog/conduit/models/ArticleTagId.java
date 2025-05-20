@@ -16,6 +16,14 @@ public class ArticleTagId implements Serializable {
         this.tagId=tagId;
     }
 
+    public void setArticleId(Integer articleId) {
+        this.articleId = articleId;
+    }
+
+    public void setTagId(Integer tagId) {
+        this.tagId = tagId;
+    }
+
     public Integer getArticleId() {
         return articleId;
     }

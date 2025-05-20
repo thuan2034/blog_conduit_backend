@@ -32,19 +32,18 @@ public class ArticleController {
     public ArticlePageResponseDto getArticlePage(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset, // Default 0
-            @RequestParam(value="tag") String tag,
-            @RequestParam(value="author") String author,
-            @RequestParam(value="favorited") String favorited
+            @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "author", required = false) String author,
+            @RequestParam(value = "favorited", required = false) String favorited
     ) {
-        return articleService.findAll(limit,offset,tag,author,favorited);
+        return articleService.findAll(limit, offset, tag, author, favorited);
     }
 
     @GetMapping("/feed")
     public ArticlePageResponseDto getFeedArticles(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
-    )
-    {
+    ) {
         return articleService.findFeedArticles(limit, offset);
     }
 
@@ -57,35 +56,30 @@ public class ArticleController {
 //    }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<ResponseObject> getBySlug(@PathVariable("slug") String slug){
-      Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
-      return foundArticle.isPresent()?
-              ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
-              ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
+    public ResponseEntity<ResponseObject> getBySlug(@PathVariable("slug") String slug) {
+        Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
+        return foundArticle.isPresent() ?
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", foundArticle)) :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
     }
 
     @PostMapping
     public ResponseEntity<ResponseObject> create(@RequestBody ArticleCreateRequestDto articleCreateRequestDto) {
-        Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(articleCreateRequestDto.getSlug());
-        if (foundArticle.isPresent())
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FAILED", "slug name existed", ""));
-        Article newArticle = articleService.create(articleCreateRequestDto);
-        List<String> tagList = articleCreateRequestDto.getTagList();
-        if (tagList != null) {
-            for (String tagName : tagList) {
-                articleTagService.create(newArticle, tagName.trim());
-            }
-        }
+        ArticleResponseDto newArticle = articleService.create(articleCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseObject("OK", "created new article", newArticle));
     }
 
     @PostMapping("/{slug}/favorite")
-    public ResponseEntity<?> favoriteArticle(@PathVariable("slug") String slug){
-        return null;
+    public ResponseEntity<?> favoriteArticle(@PathVariable("slug") String slug) {
+        Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
+        if (foundArticle.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
+        else
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","favorited",articleService.favoriteArticle(slug)));
     }
 
     @DeleteMapping("/{slug}/favorite")
-    public  ResponseEntity<?> unFavoriteArticle(@PathVariable("slug") String slug){
+    public ResponseEntity<?> unFavoriteArticle(@PathVariable("slug") String slug) {
         return null;
     }
 }

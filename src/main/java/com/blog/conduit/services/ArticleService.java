@@ -4,15 +4,11 @@ import com.blog.conduit.dtos.ArticleCreateRequestDto;
 import com.blog.conduit.dtos.ArticlePageResponseDto;
 import com.blog.conduit.dtos.ArticleResponseDto;
 import com.blog.conduit.dtos.ProfileResponseDto;
-import com.blog.conduit.models.Article;
-import com.blog.conduit.models.ArticleTag;
-import com.blog.conduit.models.Follow;
-import com.blog.conduit.models.User;
-import com.blog.conduit.repositories.ArticleRepository;
-import com.blog.conduit.repositories.ArticleTagRepository;
-import com.blog.conduit.repositories.FollowRepository;
-import com.blog.conduit.repositories.UserRepository;
+import com.blog.conduit.models.*;
+import com.blog.conduit.repositories.*;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,19 +25,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class ArticleService {
+    @PersistenceContext
+    private EntityManager entityManager;
     @Autowired
     private final ArticleRepository articleRepo;
-    @Autowired
-    private final UserRepository userRepo;
-    @Autowired
-    private final ArticleTagRepository articleTagRepository;
+    private final UserService userService;
     private final FollowRepository followRepo;
+    private final ArticleFavoriteRepository articleFavoriteRepo;
+    private final ArticleTagService articleTagService;
 
-    public ArticleService(ArticleRepository articleRepo, UserRepository userRepo, ArticleTagRepository articleTagRepository, FollowRepository followRepo) {
+    public ArticleService(ArticleRepository articleRepo, UserRepository userRepo, ArticleTagRepository articleTagRepository, EntityManager entityManager, UserService userService, FollowRepository followRepo, ArticleFavoriteRepository articleFavoriteRepo, ArticleTagService articleTagService) {
         this.articleRepo = articleRepo;
-        this.userRepo = userRepo;
-        this.articleTagRepository = articleTagRepository;
+        this.entityManager = entityManager;
+        this.userService = userService;
         this.followRepo = followRepo;
+        this.articleFavoriteRepo = articleFavoriteRepo;
+        this.articleTagService = articleTagService;
     }
 
     @Transactional
@@ -63,9 +62,9 @@ public class ArticleService {
         if (email == null || email.equals("anonymousUser")) {//nếu chưa đăng nhập, không cần kiểm tra trạng thái follow
             return new ArticlePageResponseDto(articleResponseDtoList, pageSize, currentPage, totalPages, totalArticles);
         } else {
-            User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
+            User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
             articleResponseDtoList.forEach(dto -> {
-                User foundAuthor = userRepo.findByUserName(dto.getAuthor().getUserName())
+                User foundAuthor = userService.findByUserNameEntity(dto.getAuthor().getUserName())
                         .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy user"));
                 boolean isFollowing = followRepo
                         .findByFollowingUserAndFollowedUser(currentUser, foundAuthor)
@@ -80,29 +79,25 @@ public class ArticleService {
     public ArticlePageResponseDto findFeedArticles(int limit, int offset) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName(); // Lấy email từ JWT subject
-        User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
+        User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
         if (limit < 0) limit = 20; // Default limit
         if (offset < 0) offset = 0; // Default offset
         Sort sort = Sort.by("createdAt").descending();
         int page = offset / limit;
         Pageable pageable = PageRequest.of(page, limit, sort);
-        Page<Article> articlePage = articleRepo.findFeedArticles(currentUser,pageable);
+        Page<Article> articlePage = articleRepo.findFeedArticles(currentUser, pageable);
         List<Article> articleList = articlePage.getContent();
         long totalArticles = articlePage.getTotalElements(); // Lấy TỔNG số bản ghi trên tất cả các trang
         int totalPages = articlePage.getTotalPages();       // Lấy TỔNG số trang
         int currentPage = articlePage.getNumber();          // Số của trang hiện tại (bắt đầu từ 0)
         int pageSize = articlePage.getSize();               // Kích thước trang (chính là limit)
         List<ArticleResponseDto> articleResponseDtoList = articleList.stream().map(this::mapToDto).toList();
-        articleResponseDtoList.forEach(dto->{
+        articleResponseDtoList.forEach(dto -> {
             dto.getAuthor().setFollowing(true);
         });
-        return new ArticlePageResponseDto(articleResponseDtoList,pageSize,currentPage,totalPages,totalArticles);
+        return new ArticlePageResponseDto(articleResponseDtoList, pageSize, currentPage, totalPages, totalArticles);
     }
 
-    @Transactional
-    public Optional<ArticleResponseDto> findById(Integer id) {
-        return articleRepo.findById(id).map(this::mapToDto);
-    }
 
     @Transactional
     public Optional<Article> findEntityBySlug(String slug) {
@@ -117,7 +112,7 @@ public class ArticleService {
             return articleRepo.findBySlug(slug).map(this::mapToDto);
         } else {
             Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài viết"));
-            User currentUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
+            User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User email = " + email + " không tồn tại"));
             Optional<Follow> isFollow = followRepo.findByFollowingUserAndFollowedUser(currentUser, foundArticle.getAuthor());
             ArticleResponseDto articleResponseDto = mapToDto(foundArticle);
             if (isFollow.isPresent()) {
@@ -133,29 +128,72 @@ public class ArticleService {
     }
 
     @Transactional
-    public Article create(ArticleCreateRequestDto articleCreateRequestDto) {
-        User author = userRepo.findById(articleCreateRequestDto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException("User id=" + articleCreateRequestDto.getAuthorId() + " không tồn tại"));
+    public ArticleResponseDto create(ArticleCreateRequestDto dto) {
+        // 1. Lấy author
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User author = userService.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
+        // 2. Khởi tạo Article
         Article newArticle = new Article();
-        newArticle.setTitle(articleCreateRequestDto.getTitle());
-        newArticle.setSlug(articleCreateRequestDto.getSlug());
-        newArticle.setBody(articleCreateRequestDto.getBody());
-        newArticle.setDescription(articleCreateRequestDto.getDescription());
+        newArticle.setTitle(dto.getTitle());
+        newArticle.setSlug(dto.getSlug());
+        newArticle.setBody(dto.getBody());
+        newArticle.setDescription(dto.getDescription());
         newArticle.setAuthor(author);
-        return articleRepo.save(newArticle);
+        Article saved = articleRepo.save(newArticle);
+        for(String tagName:dto.getTagList()){
+            articleTagService.create(saved,tagName);
+        }
+        // 5. Trả về DTO (bạn có thể dùng saved để lấy ID, createdAt...)
+        return new ArticleResponseDto(
+                saved.getId(),
+                saved.getSlug(),
+                saved.getTitle(),
+                saved.getBody(),
+                false,
+                saved.getDescription(),
+                saved.getFavoritesCount(),
+                new ProfileResponseDto(
+                        author.getUserName(),
+                        author.getBio(),
+                        author.getImage()
+                ),
+                saved.getUpdatedAt(),
+                saved.getCreatedAt(),
+                dto.getTagList()
+        );
     }
 
+    @Transactional
+    public ArticleResponseDto favoriteArticle(String slug){
+        // 1. Lấy user
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userService.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
+        Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(()-> new EntityNotFoundException("Không thấy bài viết với slug = "+slug));
+        articleFavoriteRepo.save(new ArticleFavorite(currentUser,foundArticle));
+         ArticleResponseDto articleResponseDto = mapToDto(foundArticle);
+         articleResponseDto.setFavorited(true);
+         return articleResponseDto;
+    }
 
     private ArticleResponseDto mapToDto(Article article) {
         User author = article.getAuthor(); // Hibernate load trong cùng transaction
-        // Build ProfileResponseDto
         ProfileResponseDto profileResponseDto = new ProfileResponseDto(author.getUserName(), author.getBio(), author.getImage());
-        // Build ArticleResponseDto
-        ArticleResponseDto articleResponseDto = new ArticleResponseDto(article.getId(), article.getSlug(), article.getTitle(), article.getDescription(), article.getBody(), article.getFavoritesCount(), profileResponseDto, article.getCreatedAt(), article.getUpdatedAt());
-        List<ArticleTag> articleTagList = articleTagRepository.findByArticle(article);
-
-        List<String> tagName = articleTagList.stream().map(articleTag -> articleTag.getTag().getTagName()).collect(Collectors.toList()); // Sửa lỗi ở đây
-
-        articleResponseDto.setTagList(tagName);
-        return articleResponseDto;
+        List<String> tagList = article.getTags().stream()
+                .map(articleTag -> articleTag.getTag().getTagName())
+                .toList();
+        return new ArticleResponseDto(article.getId(),
+                article.getSlug(),
+                article.getTitle(),
+                article.getBody(),
+                false,
+                article.getDescription(),
+                article.getFavoritesCount(),
+                profileResponseDto,
+                article.getCreatedAt(),
+                article.getUpdatedAt(),
+                tagList);
     }
+
 }

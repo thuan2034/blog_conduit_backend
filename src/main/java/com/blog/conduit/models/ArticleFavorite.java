@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -25,14 +25,13 @@ public class ArticleFavorite {
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
 
     //constructors...
     public ArticleFavorite(){}
-    public ArticleFavorite(ArticleFavoriteId id, User user, Article article, OffsetDateTime createdAt) {
+    public ArticleFavorite(User user, Article article) {
         this.user = user;
         this.article = article;
-        this.createdAt = createdAt;
         this.id =new ArticleFavoriteId(article.getId(), user.getId());
     }
 
@@ -46,11 +45,11 @@ public class ArticleFavorite {
         this.id = id;
     }
 
-    public OffsetDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(OffsetDateTime createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
