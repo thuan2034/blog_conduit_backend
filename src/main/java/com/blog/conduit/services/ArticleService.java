@@ -127,14 +127,17 @@ public class ArticleService {
 
     @Transactional
     public ArticleResponseDto create(ArticleCreateRequestDto dto) {
+        //0. Kiểm tra slug unique
+        final Slugify slg = Slugify.builder().build();
+        final String resultSlug = slg.slugify(dto.getTitle());
+        if(articleRepo.existsBySlug(resultSlug)){
+            throw new RuntimeException("title này bị trùng");
+        }
         // 1. Lấy author
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User author = userService.findUserByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
         // 2. Khởi tạo Article
-        final Slugify slg = Slugify.builder().build();
-        final String resultSlug = slg.slugify(dto.getTitle());
-// result: hello-world
         Article newArticle = new Article();
         newArticle.setTitle(dto.getTitle());
         newArticle.setSlug(resultSlug);
@@ -190,6 +193,28 @@ public class ArticleService {
         articleFavoriteRepo.findByUserAndArticle(currentUser, foundArticle)
                 .ifPresent(articleFavoriteRepo::delete);
         foundArticle.decreseFavoriteCount();
+        return mapToDto(foundArticle);
+    }
+
+    @Transactional
+    public ArticleResponseDto updateArticle(ArticleCreateRequestDto dto, String slug){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userService.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
+        Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(()->new EntityNotFoundException("không tìm thấy bài viết với slug: "+ slug));
+        if(!foundArticle.getAuthor().equals(currentUser)){
+            throw new RuntimeException("Không có quyền sửa bài viết này");
+        }
+        final Slugify slg = Slugify.builder().build();
+        final String resultSlug = slg.slugify(dto.getTitle());
+        if(articleRepo.existsBySlug(resultSlug)){
+            throw new RuntimeException("title này bị trùng");
+        }
+        foundArticle.setTitle(dto.getTitle());
+        foundArticle.setSlug(resultSlug);
+        foundArticle.setBody(dto.getBody());
+        foundArticle.setDescription(dto.getDescription());
+        articleRepo.save(foundArticle);
         return mapToDto(foundArticle);
     }
 

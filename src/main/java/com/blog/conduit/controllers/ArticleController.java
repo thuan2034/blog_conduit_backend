@@ -36,10 +36,10 @@ public class ArticleController {
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "favorited", required = false) String favorited
     ) {
-        try{
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found articles",articleService.findAll(limit, offset, tag, author, favorited)));
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found articles", articleService.findAll(limit, offset, tag, author, favorited)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false",e.getMessage(),""));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false", e.getMessage(), ""));
 
         }
     }
@@ -49,10 +49,10 @@ public class ArticleController {
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
     ) {
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found feed",articleService.findFeedArticles(limit,offset)));
-    } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false",e.getMessage(),""));
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found feed", articleService.findFeedArticles(limit, offset)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false", e.getMessage(), ""));
 
         }
     }
@@ -73,13 +73,23 @@ public class ArticleController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
     }
 
+    @PutMapping("/{slug}")
+    public ResponseEntity<ResponseObject> updateArticle(@PathVariable("slug") String slug, @RequestBody ArticleCreateRequestDto articleDto) {
+        try {
+         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", articleService.updateArticle(articleDto, slug)));
+        } catch (Exception e) {
+            return   ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("NOT_IMPLEMENTED", e.getMessage(), ""));
+
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ResponseObject> create(@RequestBody ArticleCreateRequestDto articleCreateRequestDto) {
-        try{
-        ArticleResponseDto newArticle = articleService.create(articleCreateRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseObject("OK", "created new article", newArticle));
-    }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FALSE", "created new article: "+e.getMessage(),""));
+        try {
+            ArticleResponseDto newArticle = articleService.create(articleCreateRequestDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseObject("OK", "created new article", newArticle));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FALSE", "can't created new article: " + e.getMessage(), ""));
 
         }
     }
@@ -90,7 +100,7 @@ public class ArticleController {
         if (foundArticle.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
         else
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","favorited",articleService.favoriteArticle(slug)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "favorited", articleService.favoriteArticle(slug)));
     }
 
     @DeleteMapping("/{slug}/favorite")
@@ -99,7 +109,7 @@ public class ArticleController {
         if (foundArticle.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
         else
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","un favorited",articleService.unFavoriteArticle(slug)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "un favorited", articleService.unFavoriteArticle(slug)));
 
     }
 }

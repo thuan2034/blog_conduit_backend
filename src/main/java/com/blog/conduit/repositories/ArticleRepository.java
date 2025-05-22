@@ -22,4 +22,6 @@ public interface ArticleRepository extends JpaRepository<Article, Integer> {
             "WHERE f.followingUser = :currentUser" + // ...bởi người dùng hiện tại (:currentUser)
             ")")
     Page<Article> findFeedArticles(@Param("currentUser") User currentUser, Pageable pageable);
+    boolean existsBySlug(String slug);
+    boolean existsByTitle(String title);
 }
