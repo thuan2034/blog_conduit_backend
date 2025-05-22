@@ -75,8 +75,13 @@ public class ArticleController {
 
     @PostMapping
     public ResponseEntity<ResponseObject> create(@RequestBody ArticleCreateRequestDto articleCreateRequestDto) {
+        try{
         ArticleResponseDto newArticle = articleService.create(articleCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseObject("OK", "created new article", newArticle));
+    }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FALSE", "created new article: "+e.getMessage(),""));
+
+        }
     }
 
     @PostMapping("/{slug}/favorite")

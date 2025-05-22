@@ -3,7 +3,6 @@ package com.blog.conduit.dtos;
 import java.util.List;
 
 public class ArticleCreateRequestDto {
-    private String slug;
     private String title;
     private String description;
     private String body;
@@ -18,13 +17,7 @@ public class ArticleCreateRequestDto {
     }
 
 
-    public String getSlug() {
-        return slug;
-    }
 
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
 
     public String getTitle() {
         return title;

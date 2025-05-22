@@ -6,6 +6,7 @@ import com.blog.conduit.dtos.ArticleResponseDto;
 import com.blog.conduit.dtos.ProfileResponseDto;
 import com.blog.conduit.models.*;
 import com.blog.conduit.repositories.*;
+import com.github.slugify.Slugify;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
@@ -131,9 +132,12 @@ public class ArticleService {
         User author = userService.findUserByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
         // 2. Khởi tạo Article
+        final Slugify slg = Slugify.builder().build();
+        final String resultSlug = slg.slugify(dto.getTitle());
+// result: hello-world
         Article newArticle = new Article();
         newArticle.setTitle(dto.getTitle());
-        newArticle.setSlug(dto.getSlug());
+        newArticle.setSlug(resultSlug);
         newArticle.setBody(dto.getBody());
         newArticle.setDescription(dto.getDescription());
         newArticle.setAuthor(author);
