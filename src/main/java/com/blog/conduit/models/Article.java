@@ -55,6 +55,10 @@ public class Article {
         tag.getArticles().removeIf(at -> at.getArticle().equals(this));
     }
 
+    public void decreseFavoriteCount(){
+        this.favoritesCount--;
+    }
+
     // getters + setters…
 
     public Set<ArticleTag> getTags() {

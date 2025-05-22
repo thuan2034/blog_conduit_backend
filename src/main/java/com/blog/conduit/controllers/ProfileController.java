@@ -34,27 +34,30 @@ public class ProfileController {
 //    }
 
     @GetMapping("/{username}")
-    public  ResponseEntity<ResponseObject> findByUserName(@PathVariable("username") String userName){
-        Optional<ProfileResponseDto> foundProfile = Optional.ofNullable(userService.findByUserName(userName));
-        return foundProfile.isPresent() ? ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found user", foundProfile)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false", "cannot find user with username :"+userName, ""));
-
+    public ResponseEntity<ResponseObject> findByUserName(@PathVariable("username") String userName) {
+        try {
+            ProfileResponseDto foundProfile = userService.findByUserName(userName);
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found user", foundProfile));
+        }
+        catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false", e.getMessage(), ""));
+        }
     }
 
     @PostMapping("/{username}/follow")
-    public ResponseEntity<?> followUser(@PathVariable("username") String userName){
+    public ResponseEntity<?> followUser(@PathVariable("username") String userName) {
         Optional<ProfileResponseDto> foundProfile = Optional.ofNullable(userService.findByUserName(userName));
-        return foundProfile.isPresent()?
-                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","followed user",userService.followUser(userName))):
-                ResponseEntity.status((HttpStatus.NOT_IMPLEMENTED)).body(new ResponseObject("FASLE","username not found",""));
+        return foundProfile.isPresent() ?
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "followed user", userService.followUser(userName))) :
+                ResponseEntity.status((HttpStatus.NOT_IMPLEMENTED)).body(new ResponseObject("FASLE", "username not found", ""));
     }
 
     @DeleteMapping("/{username}/follow")
-    public ResponseEntity<?> unFollowUser(@PathVariable("username") String userName){
+    public ResponseEntity<?> unFollowUser(@PathVariable("username") String userName) {
         Optional<ProfileResponseDto> foundProfile = Optional.ofNullable(userService.findByUserName(userName));
-        return foundProfile.isPresent()?
-                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","unfollowed user",userService.unFollowUser(userName))):
-                ResponseEntity.status((HttpStatus.NOT_IMPLEMENTED)).body(new ResponseObject("FASLE","username not found",""));
+        return foundProfile.isPresent() ?
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "unfollowed user", userService.unFollowUser(userName))) :
+                ResponseEntity.status((HttpStatus.NOT_IMPLEMENTED)).body(new ResponseObject("FASLE", "username not found", ""));
 
     }
 }

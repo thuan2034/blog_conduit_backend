@@ -29,22 +29,32 @@ public class ArticleController {
     }
 
     @GetMapping
-    public ArticlePageResponseDto getArticlePage(
+    public ResponseEntity<ResponseObject> getArticlePage(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset, // Default 0
             @RequestParam(value = "tag", required = false) String tag,
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "favorited", required = false) String favorited
     ) {
-        return articleService.findAll(limit, offset, tag, author, favorited);
+        try{
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found articles",articleService.findAll(limit, offset, tag, author, favorited)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false",e.getMessage(),""));
+
+        }
     }
 
     @GetMapping("/feed")
-    public ArticlePageResponseDto getFeedArticles(
+    public ResponseEntity<ResponseObject> getFeedArticles(
             @RequestParam(value = "limit", defaultValue = "20") int limit, // Default 20
             @RequestParam(value = "offset", defaultValue = "0") int offset // Default 0
     ) {
-        return articleService.findFeedArticles(limit, offset);
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found feed",articleService.findFeedArticles(limit,offset)));
+    } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("false",e.getMessage(),""));
+
+        }
     }
 
 //    @GetMapping("/{id}")
@@ -80,6 +90,11 @@ public class ArticleController {
 
     @DeleteMapping("/{slug}/favorite")
     public ResponseEntity<?> unFavoriteArticle(@PathVariable("slug") String slug) {
-        return null;
+        Optional<ArticleResponseDto> foundArticle = articleService.findBySlug(slug);
+        if (foundArticle.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("NOT_FOUND", "can't find article with slug: " + slug, ""));
+        else
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","un favorited",articleService.unFavoriteArticle(slug)));
+
     }
 }

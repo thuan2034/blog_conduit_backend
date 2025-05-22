@@ -29,14 +29,12 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<ResponseObject> createUser(@RequestBody UserCreateRequestDto userDto) {
-        Optional<ProfileResponseDto> foundUsername = Optional.ofNullable(userService.findByUserName(userDto.getUserName()));
-        Optional<ProfileResponseDto> foundEmail = userService.findByEmail(userDto.getEmail());
-        if (foundUsername.isPresent())
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("false", "username: " + userDto.getUserName() + " already taken", ""));
-        if (foundEmail.isPresent())
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("false", "email: " + userDto.getEmail() + " already exist", ""));
-        ProfileResponseDto createdUser = userService.create(userDto);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "created user", createdUser));
+        try {
+            ProfileResponseDto createdUser = userService.create(userDto);
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "created user", createdUser));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("False", e.getMessage(), ""));
+        }
     }
 
     @PostMapping("/login")

@@ -3,6 +3,7 @@ package com.blog.conduit.services;
 import com.blog.conduit.dtos.ProfileResponseDto;
 import com.blog.conduit.dtos.UserCreateRequestDto;
 import com.blog.conduit.dtos.UserResponseDto;
+import com.blog.conduit.dtos.UserUpdateRequestDto;
 import com.blog.conduit.enums.UserRole;
 import com.blog.conduit.models.Follow;
 import com.blog.conduit.models.User;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -57,7 +59,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public ProfileResponseDto findByUserName(String userName) {
         User foundUser = userRepo.findByUserName(userName).orElseThrow(() -> new EntityNotFoundException(
-                "username" + userName + " không tồn tại"));
+                "username: " + userName + " không tồn tại"));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();// Lấy email từ JWT subject
         if (email != null && !email.equals("anonymousUser")) {
@@ -83,6 +85,9 @@ public class UserService {
 
     @Transactional
     public ProfileResponseDto create(UserCreateRequestDto userDto) {
+        if (userRepo.existsByEmailOrUserName(userDto.getEmail(), userDto.getUserName())) {
+           throw new RuntimeException("Email hoặc username đã tồn tại");
+        }
         User newUser = new User();
         // Ánh xạ dữ liệu từ DTO sang Entity
         newUser.setUserName(userDto.getUserName());
@@ -96,9 +101,6 @@ public class UserService {
         return new ProfileResponseDto(newUser.getUserName(), newUser.getBio(), newUser.getImage());
     }
 
-    private ProfileResponseDto mapToDto(User user) {
-        return new ProfileResponseDto(user.getUserName(), user.getBio(), user.getImage());
-    }
 
     @Transactional
     public ProfileResponseDto followUser(String userName) {
@@ -137,15 +139,29 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUser(UserResponseDto updatedUser) {
+    public UserResponseDto updateUser(UserCreateRequestDto updatedUser) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName(); // Lấy email từ JWT subject
         User foundUser = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
                 "User email = " + email + " không tồn tại"));
+        if (!email.equals(updatedUser.getEmail()) && userRepo.existsByEmail(updatedUser.getEmail())) {
+            throw new RuntimeException("email đã được sử dụng");
+        }
+        if (!foundUser.getUserName().equals(updatedUser.getUserName()) && userRepo.existsByUserName(updatedUser.getUserName())) {
+            throw new RuntimeException("username đã được sử dụng");
+        }
         foundUser.setUserName(updatedUser.getUserName());
         foundUser.setBio(updatedUser.getBio());
         foundUser.setImage(updatedUser.getImage());
+        foundUser.setPassword_hash(passwordEncoder.encode(updatedUser.getPassword()));
         userRepo.save(foundUser);
-        return updatedUser;
+        return new UserResponseDto(updatedUser.getEmail(),
+                updatedUser.getImage(),
+                updatedUser.getBio(),
+                updatedUser.getUserName());
+    }
+
+    private ProfileResponseDto mapToDto(User user) {
+        return new ProfileResponseDto(user.getUserName(), user.getBio(), user.getImage());
     }
 }
