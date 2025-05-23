@@ -76,9 +76,9 @@ public class ArticleController {
     @PutMapping("/{slug}")
     public ResponseEntity<ResponseObject> updateArticle(@PathVariable("slug") String slug, @RequestBody ArticleCreateRequestDto articleDto) {
         try {
-         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", articleService.updateArticle(articleDto, slug)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "found article", articleService.updateArticle(articleDto, slug)));
         } catch (Exception e) {
-            return   ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("NOT_IMPLEMENTED", e.getMessage(), ""));
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("NOT_IMPLEMENTED", e.getMessage(), ""));
 
         }
     }
@@ -111,5 +111,14 @@ public class ArticleController {
         else
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "un favorited", articleService.unFavoriteArticle(slug)));
 
+    }
+
+    @DeleteMapping("/{slug}")
+    public ResponseEntity<?> deleteArticle(@PathVariable("slug") String slug) {
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","deleted article",articleService.deleteArticle(slug)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("FALSE",e.getMessage(),""));
+        }
     }
 }

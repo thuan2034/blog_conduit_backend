@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -130,7 +131,7 @@ public class ArticleService {
         //0. Kiểm tra slug unique
         final Slugify slg = Slugify.builder().build();
         final String resultSlug = slg.slugify(dto.getTitle());
-        if(articleRepo.existsBySlug(resultSlug)){
+        if (articleRepo.existsBySlug(resultSlug)) {
             throw new RuntimeException("title này bị trùng");
         }
         // 1. Lấy author
@@ -197,17 +198,17 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticleResponseDto updateArticle(ArticleCreateRequestDto dto, String slug){
+    public ArticleResponseDto updateArticle(ArticleCreateRequestDto dto, String slug) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userService.findUserByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User email=" + email + " không tồn tại"));
-        Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(()->new EntityNotFoundException("không tìm thấy bài viết với slug: "+ slug));
-        if(!foundArticle.getAuthor().equals(currentUser)){
+        Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("không tìm thấy bài viết với slug: " + slug));
+        if (!foundArticle.getAuthor().equals(currentUser)) {
             throw new RuntimeException("Không có quyền sửa bài viết này");
         }
         final Slugify slg = Slugify.builder().build();
         final String resultSlug = slg.slugify(dto.getTitle());
-        if(articleRepo.existsBySlug(resultSlug)){
+        if (articleRepo.existsBySlug(resultSlug)) {
             throw new RuntimeException("title này bị trùng");
         }
         foundArticle.setTitle(dto.getTitle());
@@ -216,6 +217,17 @@ public class ArticleService {
         foundArticle.setDescription(dto.getDescription());
         articleRepo.save(foundArticle);
         return mapToDto(foundArticle);
+    }
+
+    @Transactional
+    public ArticleResponseDto deleteArticle(String slug) {
+        Article foundArticle = articleRepo.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài viết để xoa"));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!foundArticle.getAuthor().getEmail().equals(email)){
+            throw new RuntimeException("không được xoá bài viết của user khác");
+        }
+        articleRepo.delete(foundArticle);
+        return new ArticleResponseDto();
     }
 
     private ArticleResponseDto mapToDto(Article article) {
