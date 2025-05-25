@@ -19,14 +19,18 @@ public class UserController {
     }
 
     @GetMapping
-    public UserResponseDto getCurrentUser(){
-        return userService.getCurrentUser();
+    public ResponseEntity<ResponseObject> getCurrentUser() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","success",userService.getCurrentUser()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("False", e.getMessage(), ""));
+        }
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@RequestBody UserCreateRequestDto updatedUser){
+    public ResponseEntity<?> updateUser(@RequestBody UserCreateRequestDto updatedUser) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","updated user info",userService.updateUser(updatedUser)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", "updated user info", userService.updateUser(updatedUser)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ResponseObject("false", e.getMessage(), ""));
