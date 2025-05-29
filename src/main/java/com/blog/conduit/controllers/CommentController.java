@@ -27,7 +27,7 @@ public class CommentController {
     public ResponseEntity<ResponseObject> findByArticleSlug(@PathVariable("slug") String slug){
         List<CommentResponseDto> commentResponseDtoList = commentService.findByArticleSlug(slug);
         return commentResponseDtoList.isEmpty()?
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("OK","no comment for this article with slug name: "+slug,"")):
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","no comment for this article with slug name: "+slug,"")):
                 ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found comments",commentResponseDtoList));
     }
 

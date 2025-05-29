@@ -24,8 +24,8 @@ public class TagController {
 
     // 1. Lấy danh sách tất cả tag
     @GetMapping
-    public List<TagResponseDto> getAll() {
-        return tagService.findAll();
+    public ResponseEntity<ResponseObject> getAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","found tags",tagService.findAll()));
     }
 
     // 2. Lấy chi tiết 1 tag theo id
